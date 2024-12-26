@@ -3,15 +3,16 @@ import Url from "../models/Url";
 
 const urlRouter = express.Router();
 
-
-function generateShortId(): string {
-    const uppercase = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z';
-    const lowercase = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z';
-    const characters = (uppercase + lowercase).split('');
+const generateShortId = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     const length = Math.floor(Math.random() * 2) + 6;
+    let shortId = '';
 
-    return Array.from({ length }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
-}
+    for (let i = 0; i < length; i++) {
+        shortId += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return shortId;
+};
 
 urlRouter.get('/', async (_req, res, next) => {
     try {
@@ -23,21 +24,25 @@ urlRouter.get('/', async (_req, res, next) => {
 });
 
 urlRouter.get('/:shortUrl', async (req, res, next) => {
-    const  shortUrl  = req.params.shortUrl;
+    const shortUrl = req.params.shortUrl;
+    console.log('Received short URL:', shortUrl);
 
     try {
-        const record = await Url.findOne({ shortUrl });
+        const website = await Url.findOne({ shortUrl });
+        console.log('Database record:', website);
 
-        if (!record) {
+        if (!website) {
             res.status(404).send('Not found');
             return;
         }
 
-        res.status(301).redirect(record.originalUrl);
+        res.status(301).redirect(website.originalUrl);
     } catch (e) {
+        console.error('Error during redirect:', e);
         next(e);
     }
 });
+
 
 urlRouter.post('/', async (req, res, next) => {
     const { url } = req.body;
@@ -47,7 +52,7 @@ urlRouter.post('/', async (req, res, next) => {
         return;
     }
 
-    let shortId: string;
+    let shortId;
     let exists;
 
     try {
@@ -65,7 +70,7 @@ urlRouter.post('/', async (req, res, next) => {
 
         res.send({
             id: newUrl._id,
-            shortUrl: `http://localhost:8000/${shortId}`,
+            shortUrl: `http://localhost:8000/links/${shortId}`,
             originalUrl: url,
         });
     } catch (e) {

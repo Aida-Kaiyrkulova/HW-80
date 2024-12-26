@@ -1,7 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { UrlReducers } from "../features/UrlSlice.ts";
 
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    Url: UrlReducers,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;

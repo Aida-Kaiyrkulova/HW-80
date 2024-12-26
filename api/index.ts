@@ -4,7 +4,6 @@ import mongoDb from "./mongoDb";
 import cors from "cors";
 import urlRouter from "./routers/urlRouter";
 
-
 const app = express();
 const port = 8000;
 
